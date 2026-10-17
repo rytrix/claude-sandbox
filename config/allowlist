@@ -1,0 +1,29 @@
+# claude-box egress allowlist: one extended regex per line, matched against
+# "host:port" of each HTTPS connection. Everything not listed is refused,
+# including all plain HTTP.
+# Apply changes by rebuilding claude-box (go build); the proxy is rebuilt and
+# restarted on its next run. See refusals with `claude-box logs`.
+# Anchor patterns (^...:443$) so "api.anthropic.com.evil.com" can't slip through.
+
+# --- Claude Code: required --------------------------------------------------
+^api\.anthropic\.com:443$
+^platform\.claude\.com:443$
+^claude\.ai:443$
+^claude\.com:443$
+
+# --- Claude Code: optional --------------------------------------------------
+# Docs lookups by the built-in guide agent
+^code\.claude\.com:443$
+# Connectors from your claude.ai account
+^mcp-proxy\.anthropic\.com:443$
+# Plugin executables
+^downloads\.claude\.ai:443$
+# Plugin marketplaces on GitHub. Note: this also opens all of github.com.
+# ^github\.com:443$
+
+# --- Package registries: uncomment what your projects need ------------------
+#^registry\.npmjs\.org:443$
+#^pypi\.org:443$
+#^files\.pythonhosted\.org:443$
+^crates\.io:443$
+^(index|static)\.crates\.io:443$

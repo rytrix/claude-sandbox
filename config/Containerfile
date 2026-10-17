@@ -1,0 +1,12 @@
+# The sandbox image. Add your own toolchains here, then rebuild claude-box
+# (go build); the image is rebuilt on its next run.
+FROM docker.io/library/archlinux:latest
+
+RUN pacman -Syu --noconfirm --needed \
+      ca-certificates curl gnupg git ripgrep neovim less procps-ng \
+      base-devel pkgconf python \
+ && pacman -Scc --noconfirm
+
+RUN curl -fsSL https://claude.ai/install.sh | bash
+
+RUN cp -L /root/.local/bin/claude /usr/local/bin/claude

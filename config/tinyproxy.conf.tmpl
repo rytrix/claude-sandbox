@@ -1,0 +1,20 @@
+User nobody
+Group nobody
+Port 8888
+Listen 0.0.0.0
+Timeout 900
+MaxClients 200
+LogLevel Notice
+DisableViaHeader Yes
+
+# Only the sandbox network may use the proxy.
+Allow {{.Subnet}}
+
+# HTTPS only, and only to hosts that match a line in the allowlist. With
+# FilterURLs, HTTPS tunnels are matched as "host:port" but plain-HTTP requests
+# as the full URL ("http://host/..."), which no "^host:443$" line matches.
+ConnectPort 443
+FilterDefaultDeny Yes
+FilterType ere
+FilterURLs On
+Filter "/etc/tinyproxy/allowlist"
