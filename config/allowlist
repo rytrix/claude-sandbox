@@ -1,8 +1,8 @@
-# claude-box egress allowlist: one extended regex per line, matched against
+# claude-sandbox egress allowlist: one extended regex per line, matched against
 # "host:port" of each HTTPS connection. Everything not listed is refused,
 # including all plain HTTP.
-# Apply changes by rebuilding claude-box (go build); the proxy is rebuilt and
-# restarted on its next run. See refusals with `claude-box logs`.
+# Apply changes by rebuilding claude-sandbox (go build); the proxy is rebuilt and
+# restarted on its next run. See refusals with `claude-sandbox logs`.
 # Anchor patterns (^...:443$) so "api.anthropic.com.evil.com" can't slip through.
 
 # --- Claude Code: required --------------------------------------------------
@@ -25,5 +25,5 @@
 #^registry\.npmjs\.org:443$
 #^pypi\.org:443$
 #^files\.pythonhosted\.org:443$
-^crates\.io:443$
-^(index|static)\.crates\.io:443$
+#^crates\.io:443$
+#^(index|static)\.crates\.io:443$

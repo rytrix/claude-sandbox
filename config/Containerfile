@@ -1,4 +1,4 @@
-# The sandbox image. Add your own toolchains here, then rebuild claude-box
+# The sandbox image. Add your own toolchains here, then rebuild claude-sandbox
 # (go build); the image is rebuilt on its next run.
 FROM docker.io/library/archlinux:latest
 

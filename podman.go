@@ -53,7 +53,7 @@ func execPodman(args ...string) error {
 
 // hashLabel is the image and container label holding the hash of the embedded
 // files they were built from.
-const hashLabel = "claude-box.files"
+const hashLabel = "claude-sandbox.files"
 
 type image struct {
 	Name  string
@@ -61,13 +61,13 @@ type image struct {
 }
 
 var (
-	proxyImage = image{"localhost/claude-box-proxy", []string{"proxy.Containerfile", "tinyproxy.conf", "allowlist"}}
-	boxImage   = image{"localhost/claude-box", []string{"Containerfile"}}
+	proxyImage = image{"localhost/claude-sandbox-proxy", []string{"proxy.Containerfile", "tinyproxy.conf", "allowlist"}}
+	boxImage   = image{"localhost/claude-sandbox", []string{"Containerfile"}}
 )
 
 // buildImage builds img from the embedded files, labelled with their hash.
 func buildImage(c config, img image) error {
-	dir, err := os.MkdirTemp("", "claude-box-build-")
+	dir, err := os.MkdirTemp("", "claude-sandbox-build-")
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func ensureImage(c config, img image) error {
 	if err == nil && strings.TrimSpace(string(out)) == filesHash(c.Files, img.Files) {
 		return nil
 	}
-	fmt.Fprintf(os.Stderr, "claude-box: building %s...\n", img.Name)
+	fmt.Fprintf(os.Stderr, "claude-sandbox: building %s...\n", img.Name)
 	return buildImage(c, img)
 }
 
@@ -123,7 +123,7 @@ func stopProxy() {
 }
 
 // ensureProxy starts the proxy, or restarts it if it runs with an outdated
-// config (e.g. an allowlist from before claude-box was rebuilt).
+// config (e.g. an allowlist from before claude-sandbox was rebuilt).
 func ensureProxy(c config) error {
 	hash := filesHash(c.Files, proxyImage.Files)
 	out, err := podmanOutput("inspect", "-f", `{{.State.Running}} {{index .Config.Labels "`+hashLabel+`"}}`, proxyName)

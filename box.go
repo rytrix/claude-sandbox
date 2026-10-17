@@ -30,7 +30,7 @@ func resolvePath(p string) string {
 // boxArgs returns the `podman run` options shared by every sandbox container.
 func boxArgs(c config) []string {
 	return []string{
-		"--hostname", "claude-box",
+		"--hostname", "claude-sandbox",
 		"--network", netName,
 		"--userns=keep-id",
 		"--cap-drop=all",
@@ -73,14 +73,14 @@ func isTerminal(f *os.File) bool {
 }
 
 // ---------------------------------------------------------------------------
-// claude-box test
+// claude-sandbox test
 // ---------------------------------------------------------------------------
 
 // selfTest starts a sandbox container and checks its network isolation from
 // inside it.
 func selfTest(c config) error {
 	// The container sleeps for a limited time, so --rm cleans it up even if
-	// claude-box is interrupted before its own cleanup runs.
+	// claude-sandbox is interrupted before its own cleanup runs.
 	args := append([]string{"run", "-d", "--rm"}, boxArgs(c)...)
 	out, err := podmanOutput(append(args, boxImage.Name, "sleep", "120")...)
 	if err != nil {

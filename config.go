@@ -11,7 +11,7 @@ import (
 )
 
 // configFS holds the files the images are built from. They are embedded at
-// build time, so to change them, edit config/ and rebuild claude-box. Files
+// build time, so to change them, edit config/ and rebuild claude-sandbox. Files
 // ending in .tmpl are rendered with templateData (e.g. {{.Subnet}}) and used
 // without the suffix.
 //

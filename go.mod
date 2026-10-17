@@ -1,3 +1,3 @@
-module claude-box
+module claude-sandbox
 
 go 1.22

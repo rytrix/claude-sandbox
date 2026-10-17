@@ -1,4 +1,4 @@
-// claude-box runs Claude Code in a rootless Podman sandbox.
+// claude-sandbox runs Claude Code in a rootless Podman sandbox.
 //
 //   - Only the current directory is mounted (at the same path).
 //   - The container gets its own persistent home; your real home is never mounted.
@@ -7,20 +7,20 @@
 //
 // Usage:
 //
-//	claude-box [claude args...]   start Claude Code in $PWD (args pass through)
-//	claude-box shell [args...]    open a bash shell in the same sandbox
-//	claude-box build              rebuild both images, e.g. to update Claude Code
-//	claude-box logs               follow the proxy log (shows refused domains)
-//	claude-box test               check that the network isolation works
+//	claude-sandbox [claude args...]   start Claude Code in $PWD (args pass through)
+//	claude-sandbox shell [args...]    open a bash shell in the same sandbox
+//	claude-sandbox build              rebuild both images, e.g. to update Claude Code
+//	claude-sandbox logs               follow the proxy log (shows refused domains)
+//	claude-sandbox test               check that the network isolation works
 //
 // Config:  config/ in this repository (Containerfiles, allowlist, tinyproxy.conf),
 //
-//	embedded at build time. After editing it, rebuild claude-box; the
+//	embedded at build time. After editing it, rebuild claude-sandbox; the
 //	images are rebuilt and the proxy restarted on the next run.
 //
-// Home:    ~/.local/share/claude-box/home
+// Home:    ~/.local/share/claude-sandbox/home
 //
-// Install: go build -o ~/.local/bin/claude-box .
+// Install: go build -o ~/.local/bin/claude-sandbox .
 
 package main
 
@@ -33,8 +33,8 @@ import (
 )
 
 const (
-	proxyName = "claude-box-proxy"
-	netName   = "claude-box-net"
+	proxyName = "claude-sandbox-proxy"
+	netName   = "claude-sandbox-net"
 	subnet    = "10.89.77.0/24"
 	proxyIP   = "10.89.77.2" // fixed address of the proxy on the sandbox network
 	proxyURL  = "http://" + proxyIP + ":8888"
@@ -61,7 +61,7 @@ func loadConfig() (config, error) {
 
 	c := config{
 		Home:    home,
-		BoxHome: filepath.Join(dataHome, "claude-box", "home"),
+		BoxHome: filepath.Join(dataHome, "claude-sandbox", "home"),
 		Workdir: workdir,
 	}
 	c.Files, err = loadFiles()
@@ -78,7 +78,7 @@ func envOr(key, def string) string {
 
 func main() {
 	if err := run(os.Args[1:]); err != nil {
-		fmt.Fprintln(os.Stderr, "claude-box:", err)
+		fmt.Fprintln(os.Stderr, "claude-sandbox:", err)
 		os.Exit(1)
 	}
 }
@@ -104,7 +104,7 @@ func run(args []string) error {
 			}
 		}
 		stopProxy()
-		fmt.Println("claude-box: images built")
+		fmt.Println("claude-sandbox: images built")
 		return nil
 	case "logs":
 		return execPodman("logs", "-f", proxyName)
