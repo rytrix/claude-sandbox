@@ -146,3 +146,30 @@ func ensureProxy(c config) error {
 	time.Sleep(time.Second) // give tinyproxy a moment to start listening
 	return nil
 }
+
+// clean removes everything claude-sandbox created in podman: the sandbox
+// containers (including running sessions), the proxy, the network and the
+// images. The sandbox home is left alone, since it holds your Claude Code
+// login; the next run recreates the rest.
+func clean() error {
+	out, err := podmanOutput("ps", "-aq", "--filter", "ancestor="+boxImage.Name)
+	if err != nil {
+		return err
+	}
+	ids := strings.Fields(string(out))
+	if len(ids) > 0 {
+		if _, err := podmanOutput(append([]string{"rm", "-f", "-t", "0"}, ids...)...); err != nil {
+			return err
+		}
+	}
+	if _, err := podmanOutput("rm", "-f", "--ignore", proxyName); err != nil {
+		return err
+	}
+	if podmanSucceeds("network", "exists", netName) {
+		if _, err := podmanOutput("network", "rm", netName); err != nil {
+			return err
+		}
+	}
+	_, err = podmanOutput("rmi", "--ignore", proxyImage.Name, boxImage.Name)
+	return err
+}

@@ -59,17 +59,19 @@ Run it from the project directory you want Claude Code to work on:
 
 ```sh
 cd ~/src/my-project
-claude-sandbox                  # start Claude Code; any arguments pass through
-claude-sandbox --resume         # e.g. arguments for claude
+claude-sandbox run              # start Claude Code; any further arguments pass through
+claude-sandbox run --resume     # e.g. arguments for claude
 ```
 
 | Command                    | Description                                              |
 | -------------------------- | -------------------------------------------------------- |
-| `claude-sandbox [args...]`     | Start Claude Code in the current directory               |
+| `claude-sandbox run [args...]` | Start Claude Code in the current directory               |
 | `claude-sandbox shell [args]`  | Open a bash shell in the same sandbox                    |
 | `claude-sandbox build`         | Rebuild both images, e.g. to update Claude Code          |
 | `claude-sandbox logs`          | Follow the proxy log (shows refused domains)             |
 | `claude-sandbox test`          | Check that the network isolation works                   |
+| `claude-sandbox clean`         | Remove the containers, network and images                |
+| `claude-sandbox help`          | Show the usage                                           |
 
 Claude Code's auto-updater is disabled inside the sandbox; run
 `claude-sandbox build` to pull the latest version.
@@ -131,13 +133,18 @@ go test ./...
 
 ## Resetting
 
-To remove everything `claude-sandbox` created:
+To remove all containers (including running sessions), the network and the
+images `claude-sandbox` created:
 
 ```sh
-podman rm -f claude-sandbox-proxy
-podman network rm claude-sandbox-net
-podman rmi localhost/claude-sandbox localhost/claude-sandbox-proxy
-rm -rf ~/.local/share/claude-sandbox   # the sandbox home, incl. Claude Code login
+claude-sandbox clean
+```
+
+The next run recreates them. The sandbox home, including your Claude Code
+login, is kept; to remove it as well:
+
+```sh
+rm -rf ~/.local/share/claude-sandbox
 ```
 
 ## License

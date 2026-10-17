@@ -3,7 +3,7 @@
 FROM docker.io/library/archlinux:latest
 
 RUN pacman -Syu --noconfirm --needed \
-      ca-certificates curl gnupg git ripgrep neovim less procps-ng \
+      ca-certificates curl gnupg git ripgrep neovim wl-clipboard less procps-ng \
       base-devel pkgconf python \
  && pacman -Scc --noconfirm
 

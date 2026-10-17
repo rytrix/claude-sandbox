@@ -7,11 +7,13 @@
 //
 // Usage:
 //
-//	claude-sandbox [claude args...]   start Claude Code in $PWD (args pass through)
-//	claude-sandbox shell [args...]    open a bash shell in the same sandbox
-//	claude-sandbox build              rebuild both images, e.g. to update Claude Code
-//	claude-sandbox logs               follow the proxy log (shows refused domains)
-//	claude-sandbox test               check that the network isolation works
+//	claude-sandbox run [claude args...]   start Claude Code in $PWD (args pass through)
+//	claude-sandbox shell [args...]        open a bash shell in the same sandbox
+//	claude-sandbox build                  rebuild both images, e.g. to update Claude Code
+//	claude-sandbox logs                   follow the proxy log (shows refused domains)
+//	claude-sandbox test                   check that the network isolation works
+//	claude-sandbox clean                  remove the containers, network and images
+//	claude-sandbox help                   show this help
 //
 // Config:  config/ in this repository (Containerfiles, allowlist, tinyproxy.conf),
 //
@@ -83,7 +85,38 @@ func main() {
 	}
 }
 
+const usageText = `Usage:
+  claude-sandbox run [claude args...]   start Claude Code in $PWD (args pass through)
+  claude-sandbox shell [args...]        open a bash shell in the same sandbox
+  claude-sandbox build                  rebuild both images, e.g. to update Claude Code
+  claude-sandbox logs                   follow the proxy log (shows refused domains)
+  claude-sandbox test                   check that the network isolation works
+  claude-sandbox clean                  remove the containers, network and images
+  claude-sandbox help                   show this help
+
+Info:
+  Only the current directory gets mounted. The sandbox home is kept in
+  $XDG_DATA_HOME/claude-sandbox/home (default ~/.local/share/claude-sandbox/home).
+`
+
+func usage() {
+	fmt.Print(usageText)
+}
+
 func run(args []string) error {
+	cmd := ""
+	if len(args) > 0 {
+		cmd = args[0]
+	}
+	switch cmd {
+	case "", "help", "-h", "--help":
+		usage()
+		return nil
+	case "run", "shell", "build", "logs", "test", "clean":
+	default:
+		return fmt.Errorf("unknown command %q (see 'claude-sandbox help')", cmd)
+	}
+
 	if _, err := exec.LookPath("podman"); err != nil {
 		return errors.New("podman is not installed")
 	}
@@ -92,10 +125,6 @@ func run(args []string) error {
 		return err
 	}
 
-	cmd := ""
-	if len(args) > 0 {
-		cmd = args[0]
-	}
 	switch cmd {
 	case "build":
 		for _, img := range []image{proxyImage, boxImage} {
@@ -108,6 +137,13 @@ func run(args []string) error {
 		return nil
 	case "logs":
 		return execPodman("logs", "-f", proxyName)
+	case "clean":
+		if err := clean(); err != nil {
+			return err
+		}
+		fmt.Println("claude-sandbox: removed containers, network and images")
+		fmt.Printf("claude-sandbox: the sandbox home (incl. your Claude Code login) was kept; to remove it too, run:\n  rm -rf %s\n", filepath.Dir(c.BoxHome))
+		return nil
 	}
 
 	// The other commands all run a sandbox container in the current directory.
@@ -122,8 +158,10 @@ func run(args []string) error {
 		return selfTest(c)
 	case "shell":
 		return execBox(c, append([]string{"bash"}, args[1:]...))
+	case "run":
+		return execBox(c, append([]string{"claude"}, args[1:]...))
 	default:
-		return execBox(c, append([]string{"claude"}, args...))
+		return fmt.Errorf("unimplemented command %q, this is a bug", cmd)
 	}
 }
 
